@@ -1,0 +1,610 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Which Character Are You?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Bebas+Neue&family=Black+Ops+One&family=Cinzel:wght@800&family=Nunito:wght@600;700;800&family=Orbitron:wght@800&family=Special+Elite&display=swap">
+<style>
+/* Layout: one narrow comic-book column. Every screen is a stack of inked panels over a halftone night sky; the yellow caption box is the loudest thing on the quiz screens, and each result card re-themes itself to its character. */
+:root{
+  --ink:#120f2e;
+  --night:#1b1640;
+  --paper:#fffdf5;
+  --pop:#ffd23f;
+  --hot:#ff3d81;
+  --cool:#2ee6d6;
+  --soft:#cfc9f5;
+  --display:'Bangers','Impact','Arial Black',sans-serif;
+  --body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background-color:var(--night);
+  background-image:radial-gradient(rgba(255,255,255,.07) 1.4px,transparent 1.5px),radial-gradient(120% 55% at 50% 0%,#2f2073 0%,transparent 70%);
+  background-size:14px 14px,100% 100%;
+  color:var(--paper);
+  font-family:var(--body);font-weight:600;font-size:16px;line-height:1.45;
+  min-height:100vh;
+  padding-block:18px 44px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:520px;margin:0 auto;display:grid;gap:20px;min-width:0}
+.wrap>*{min-width:0}
+:focus-visible{outline:3px solid var(--cool);outline-offset:3px}
+button{font:inherit;color:inherit}
+
+.mast{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:800 .72rem/1.2 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--cool)}
+.mast span:last-child{color:var(--pop)}
+
+h1,h2{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+.hero{text-align:center;display:grid;gap:14px;justify-items:center;padding-top:6px}
+.hero h1{font-size:clamp(2.7rem,13vw,4rem);line-height:.95;letter-spacing:.02em;color:var(--pop);text-shadow:4px 4px 0 var(--hot);transform:rotate(-2deg)}
+.lede{max-width:34ch;margin:0;color:#ece9ff}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{border:2px solid var(--soft);border-radius:999px;padding:3px 12px;font:800 .74rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+
+.btn{
+  font-family:var(--display);font-size:1.5rem;letter-spacing:.06em;
+  min-height:56px;padding:12px 24px;cursor:pointer;
+  background:var(--pop);color:var(--ink);
+  border:4px solid var(--ink);border-radius:8px;box-shadow:5px 5px 0 var(--hot);
+  transition:transform .12s,box-shadow .12s;
+}
+.btn:hover{box-shadow:7px 7px 0 var(--hot)}
+.btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--hot)}
+.btn.alt{background:var(--paper);box-shadow:5px 5px 0 var(--cool)}
+.btn.alt:hover{box-shadow:7px 7px 0 var(--cool)}
+.btn.alt:active{box-shadow:2px 2px 0 var(--cool)}
+.btn[disabled]{opacity:.6;cursor:progress}
+/* hover only grows the shadow (a moving hover target flickers when a new question appears under a resting pointer); the press nudge keeps a slightly larger hit area */
+.btn,.opt{position:relative}
+.btn::after,.opt::after{content:"";position:absolute;inset:-4px}
+.linkbtn{background:none;border:0;padding:8px 4px;color:var(--soft);font:800 .85rem var(--body);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;text-decoration:underline;text-underline-offset:4px;justify-self:start}
+
+/* quiz */
+.quiz{display:grid;gap:16px}
+.prog{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.prog i{height:10px;border:2px solid var(--soft);border-radius:3px}
+.prog i.done{background:var(--cool);border-color:var(--cool)}
+.prog i.now{background:var(--pop);border-color:var(--pop)}
+.qnum{margin:0;font:800 .78rem var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+.qbox{
+  background:var(--pop);color:var(--ink);
+  border:4px solid var(--ink);border-radius:6px;box-shadow:6px 6px 0 var(--hot);
+  padding:18px;transform:rotate(-.6deg);
+  font-family:var(--display);font-size:clamp(1.5rem,6.6vw,2.05rem);line-height:1.1;letter-spacing:.02em;text-wrap:balance;
+}
+.qbox:focus,.name:focus{outline:none}
+.opts{display:grid;gap:12px}
+.opt{
+  display:flex;align-items:center;gap:14px;width:100%;min-height:60px;padding:12px 14px;text-align:left;cursor:pointer;
+  background:var(--paper);color:var(--ink);
+  border:4px solid var(--ink);border-radius:8px;box-shadow:5px 5px 0 #0a0820;
+  font:800 1.05rem/1.25 var(--body);
+  transition:transform .12s,box-shadow .12s,background .12s;
+}
+.opt:hover{box-shadow:8px 8px 0 #0a0820}
+.opt:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #0a0820}
+.opt .badge{flex:none;display:grid;place-items:center;width:34px;height:34px;border:3px solid var(--ink);border-radius:50%;background:var(--cool);font-family:var(--display);font-weight:400;font-size:1.2rem;line-height:1}
+.opt.chosen{background:var(--pop)}
+.enter{animation:pop-in .28s ease-out}
+@keyframes pop-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* quote footer, one per screen */
+.qfoot{margin:0;padding-top:18px;border-top:3px dashed rgba(207,201,245,.35);text-align:center;display:grid;gap:6px}
+.qline{margin:0;font:400 clamp(1.4rem,6vw,1.9rem)/1.1 var(--display);letter-spacing:.03em;color:var(--pop);text-shadow:3px 3px 0 var(--hot);text-wrap:balance}
+.qby{margin:0;font:800 .74rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+
+/* result card: every colour below is set per character from the THEMES table */
+.card{
+  --bg1:#19c3b1;--bg2:#0b7d73;--ink:#120f2e;--paper:#fffdf5;--band:#120f2e;--ac:#ffd23f;--bandA:#ffd23f;--burst:#ffd23f;--disc:#120f2e;--rim:#19c3b1;--icon:#fffdf5;--fg:#120f2e;--edge:#120f2e;--shadow:#120f2e;--hlT:#120f2e;--disp:'Bangers','Impact',sans-serif;--fw:400;
+  position:relative;overflow:hidden;isolation:isolate;color:var(--fg);
+  background:linear-gradient(160deg,var(--bg1),var(--bg2));
+  border:5px solid var(--edge);border-radius:10px;box-shadow:8px 8px 0 #0a0820;
+}
+.bgsvg{position:absolute;inset:0;width:100%;height:100%;z-index:-1;display:block}
+.card-top,.card-foot{position:relative;display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;background:var(--band);padding:10px 14px}
+.card-top{color:var(--bandA);font-family:var(--disp);font-weight:var(--fw);letter-spacing:.06em;font-size:.95rem}
+.card-foot{color:var(--paper);font:800 .74rem var(--body);letter-spacing:.12em;text-transform:uppercase}
+.card-foot b{font-family:var(--disp);font-weight:var(--fw);font-size:1.1rem;letter-spacing:.06em;color:var(--bandA)}
+.card-body{position:relative;padding:12px 16px 18px;display:grid;gap:10px;justify-items:center;text-align:center}
+.emblem{width:min(250px,70%);aspect-ratio:1;display:block;max-width:100%}
+.eart{width:100%;height:auto;display:block}
+.you{font:800 .78rem var(--body);letter-spacing:.24em;text-transform:uppercase}
+.name{
+  font-family:var(--disp);font-weight:var(--fw);text-transform:uppercase;
+  font-size:clamp(2.2rem,11vw,3.3rem);line-height:1;color:var(--paper);
+  -webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:4px 4px 0 var(--shadow);letter-spacing:.02em;overflow-wrap:anywhere;
+}
+.tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.pill{background:var(--band);color:var(--paper);border-radius:999px;padding:4px 12px;font:800 .76rem var(--body);letter-spacing:.08em;text-transform:uppercase}
+.pill.hl{background:var(--ac);color:var(--hlT);border:2px solid var(--ink);padding:2px 12px}
+.bubble{position:relative;margin-top:12px;width:100%;background:var(--paper);color:var(--ink);border:4px solid var(--edge);border-radius:16px;padding:12px 16px;font:800 1.08rem/1.3 var(--body)}
+.bubble::before{content:"";position:absolute;top:-19px;left:28px;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:15px solid var(--edge)}
+.bubble::after{content:"";position:absolute;top:-10px;left:33px;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid var(--paper)}
+.who{display:block;margin-top:4px;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.blurb{margin:0;max-width:40ch;font-weight:700}
+.traits{width:100%;display:grid;gap:10px;text-align:left;margin-top:4px}
+.lbl{display:flex;justify-content:space-between;gap:8px;font:800 .7rem var(--body);letter-spacing:.1em;text-transform:uppercase}
+.bar{position:relative;height:14px;margin-top:5px;background:var(--paper);border:3px solid var(--edge);border-radius:8px}
+.bar b{position:absolute;top:-8px;width:14px;height:26px;margin-left:-7px;background:var(--ink);border:2px solid var(--paper);border-radius:3px}
+
+.actions{display:grid;gap:12px}
+.actions .btn{width:100%}
+.pngbox{margin:0;display:grid;gap:8px}
+.pngbox img{display:block;width:100%;height:auto;border:4px solid var(--soft);border-radius:8px;background:#000}
+.pngbox figcaption{color:var(--soft);font-size:.9rem}
+.cap{width:100%;min-height:104px;resize:none;padding:10px 12px;background:rgba(255,255,255,.08);color:var(--paper);border:3px solid var(--soft);border-radius:8px;font:600 .92rem/1.4 var(--body)}
+.near{margin:0;color:var(--soft);text-align:center}
+.near b{color:var(--paper)}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100vw - 32px);background:var(--pop);color:var(--ink);border:3px solid var(--ink);border-radius:8px;padding:8px 14px;font:800 .9rem var(--body);box-shadow:4px 4px 0 var(--hot);z-index:20}
+
+/* emblem art, coloured by the surrounding theme */
+.e-burst path{fill:var(--burst);stroke:var(--ink);stroke-width:3;stroke-linejoin:round}
+.e-ringc{fill:none;stroke:var(--edge);stroke-width:4;stroke-dasharray:3 9;stroke-linecap:round}
+.e-disc{fill:var(--disc);stroke:var(--rim);stroke-width:6}
+.e-icon path{fill:var(--icon);stroke:var(--rim);stroke-width:3;stroke-linejoin:round;fill-rule:evenodd}
+.e-q{font-family:var(--display);font-size:104px;fill:var(--paper);stroke:var(--hot);stroke-width:4;paint-order:stroke fill;text-anchor:middle}
+.e-sp path{fill:var(--paper);stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.e-burst{transform-box:view-box;transform-origin:50% 50%;animation:spin 26s linear infinite}
+.e-ring{transform-box:view-box;transform-origin:50% 50%;animation:spin 18s linear infinite reverse}
+.e-icon,.e-sp{transform-box:fill-box;transform-origin:50% 50%}
+.e-icon{animation:beat 1.8s ease-in-out infinite}
+.e-sp{animation:twinkle 2.2s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+@keyframes twinkle{0%,100%{transform:scale(.55);opacity:.45}50%{transform:scale(1.15);opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="mast"><span>Comic Con Hyderabad 2026</span><span>CCI Office</span></div>
+
+  <section id="intro" class="hero">
+    <div id="mystery" class="emblem" style="--burst:#ffd23f;--ink:#120f2e;--disc:#120f2e;--rim:#ff3d81;--icon:#fffdf5;--edge:#cfc9f5;width:min(250px,68%)"></div>
+    <h1>Which character are you?</h1>
+    <p class="lede">Answer six quick questions and find out which hero, villain or anime legend matches you.</p>
+    <div class="chips"><span class="chip">6 questions</span><span class="chip">About a minute</span><span class="chip">12 characters</span></div>
+    <button id="start" class="btn" type="button">Start the quiz</button>
+  </section>
+
+  <section id="quiz" class="quiz" hidden>
+    <div class="prog" id="prog" aria-hidden="true"></div>
+    <p class="qnum" id="qnum" aria-live="polite"></p>
+    <div id="panel" class="quiz">
+      <h2 id="qtext" class="qbox" tabindex="-1"></h2>
+      <div id="opts" class="opts"></div>
+    </div>
+    <button id="back" class="linkbtn" type="button">Back</button>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap" style="gap:18px">
+      <article id="card" class="card" aria-labelledby="rname">
+        <svg id="cardbg" class="bgsvg" viewBox="0 0 1080 1350" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
+        <div class="card-top"><span>Comic Con Hyderabad 2026</span><span>11 to 13 Dec</span></div>
+        <div class="card-body">
+          <div id="remblem" class="emblem"></div>
+          <div class="you">You are</div>
+          <h2 id="rname" class="name" tabindex="-1"></h2>
+          <div class="tags"><span id="rgenre" class="pill hl"></span><span id="rarch" class="pill"></span></div>
+          <div class="bubble"><span id="rquote"></span><span id="rwho" class="who"></span></div>
+          <p id="rblurb" class="blurb"></p>
+          <div id="rtraits" class="traits"></div>
+        </div>
+        <div class="card-foot"><b>CCI Office</b><span>#ComicConHyderabad2026</span></div>
+      </article>
+
+      <p id="rnear" class="near"></p>
+
+      <div class="actions">
+        <button id="save" class="btn" type="button" hidden>Download card image</button>
+        <figure id="pngbox" class="pngbox" hidden>
+          <img id="pngimg" alt="Your character card as an image">
+          <figcaption id="pngnote">Your card as an image. Press and hold it (or right-click it), then choose Save image.</figcaption>
+        </figure>
+        <label for="cap" class="qnum">Caption for your post</label>
+        <textarea id="cap" class="cap" readonly></textarea>
+        <button id="copy" class="btn alt" type="button">Copy caption</button>
+        <button id="again" class="linkbtn" type="button" style="justify-self:center">Play again</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="qfoot">
+    <p id="qline" class="qline"></p>
+    <p id="qby" class="qby"></p>
+  </footer>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+const Q=[{"text": "A building starts to collapse with people inside. What do you do?", "options": [{"t": "Carry everyone out, one by one", "v": [1, -1, 1]}, {"t": "Catch whoever caused it first", "v": [-1, 1, 0]}, {"t": "Do both. Somehow.", "v": [2, 1, -2]}]}, {"text": "Pick one power. You keep it forever.", "options": [{"t": "Mind control", "v": [-2, 1, 2]}, {"t": "Super speed", "v": [1, -2, -1]}, {"t": "Invisibility", "v": [-1, 1, -1]}]}, {"text": "Your team just lost badly. What happens next?", "options": [{"t": "I take the blame", "v": [2, 0, 2]}, {"t": "I quietly fix it overnight", "v": [0, 2, 1]}, {"t": "I rewrite the rules", "v": [-2, 1, -2]}]}, {"text": "Choose your weapon.", "options": [{"t": "A suit full of gadgets", "v": [1, 1, 0]}, {"t": "Old, unpredictable magic", "v": [0, 1, -1]}, {"t": "My own two fists", "v": [1, -2, 0]}]}, {"text": "Would you rather be feared or loved?", "options": [{"t": "Feared", "v": [-2, 1, 1]}, {"t": "Loved", "v": [2, -1, 0]}, {"t": "Neither. Just left alone.", "v": [-1, -2, -1]}]}, {"text": "A stranger offers unlimited power in exchange for one secret.", "options": [{"t": "Take the deal", "v": [-2, 0, -2]}, {"t": "Walk away", "v": [2, -1, 2]}, {"t": "Ask to read the fine print", "v": [0, 2, 1]}]}];
+const CH=[{"id": "captain", "name": "Captain America", "genre": "Superhero", "arch": "The Born Leader", "quote": "I can do this all day.", "c1": "#19c3b1", "c2": "#ffd23f", "icon": "shield", "blurb": "You stand up first and sit down last. People follow you because you never ask them to do what you won't.", "at": [0.7071, 0.0, 0.7071], "bias": -0.1531}, {"id": "spider", "name": "Spider-Man", "genre": "Superhero", "arch": "The Everyday Hero", "quote": "Your friendly neighborhood Spider-Man!", "c1": "#ff7a1a", "c2": "#ffe066", "icon": "star", "blurb": "Big heart, quick wit and a very busy schedule. You help out first and worry about the consequences later.", "at": [0.7071, 0.0, -0.7071], "bias": 0.0638}, {"id": "iron", "name": "Iron Man", "genre": "Superhero", "arch": "The Genius Inventor", "quote": "I am Iron Man.", "c1": "#ffb703", "c2": "#3a86ff", "icon": "hexring", "blurb": "You fix problems by building something new, usually with a joke in your pocket and a prototype in the garage.", "at": [0.0, 0.7071, -0.7071], "bias": -0.003}, {"id": "batman", "name": "Batman", "genre": "Superhero", "arch": "The Shadow Strategist", "quote": "I am vengeance. I am the night. I am Batman!", "c1": "#5b4bff", "c2": "#c1ff3d", "icon": "tri", "blurb": "You plan three steps ahead and do your best work after dark. Quiet, prepared and very hard to surprise.", "at": [0.0, 0.7071, 0.7071], "bias": -0.1757}, {"id": "gandalf", "name": "Gandalf", "genre": "Fantasy", "arch": "The Wise Guide", "quote": "You shall not pass!", "c1": "#4cc9f0", "c2": "#f8f9fa", "icon": "sparkle", "blurb": "You turn up exactly when you mean to. Patient and wise, with a plan nobody else has noticed yet.", "at": [0.7071, 0.7071, 0.0], "bias": 0.0639}, {"id": "naruto", "name": "Naruto", "genre": "Anime", "arch": "The Never-Quit Dreamer", "quote": "I never go back on my word! That's my ninja way!", "c1": "#8ac926", "c2": "#ff924c", "icon": "chevrons", "blurb": "You never quit, even when everyone expects you to. Your loudest dream is also your biggest strength.", "at": [0.0, -0.7071, -0.7071], "bias": 0.1111}, {"id": "goku", "name": "Goku", "genre": "Anime", "arch": "The Gentle Powerhouse", "quote": "Power comes in response to a need, not a desire.", "c1": "#ff8c42", "c2": "#00d4ff", "icon": "sunburst", "blurb": "Kind, curious and ridiculously strong. You would rather find a worthy rival than win an easy fight.", "at": [0.7071, -0.7071, 0.0], "bias": -0.1789}, {"id": "kratos", "name": "Kratos", "genre": "Games", "arch": "The Hardened Guardian", "quote": "Do not be sorry. Be better.", "c1": "#e63946", "c2": "#f1faee", "icon": "mountains", "blurb": "You say little, carry a lot and keep going. Under the hard shell is someone trying to be better.", "at": [0.0, -0.7071, 0.7071], "bias": 0.0757}, {"id": "joker", "name": "Joker", "genre": "Supervillain", "arch": "The Agent of Chaos", "quote": "Why so serious?", "c1": "#f72585", "c2": "#7bff00", "icon": "die", "blurb": "You treat rules like suggestions and plans like jokes. Life is more fun when nobody sees the next move coming.", "at": [-0.7071, -0.7071, 0.0], "bias": 0.4065}, {"id": "loki", "name": "Loki", "genre": "Supervillain", "arch": "The Silver-Tongued Trickster", "quote": "I am burdened with glorious purpose.", "c1": "#06d6a0", "c2": "#b388ff", "icon": "crown", "blurb": "Charming, clever and always three tricks ahead. You win by talking, and you enjoy the show.", "at": [-0.7071, 0.0, -0.7071], "bias": -0.0788}, {"id": "thanos", "name": "Thanos", "genre": "Supervillain", "arch": "The Cosmic Planner", "quote": "I am inevitable.", "c1": "#9d4edd", "c2": "#ffd60a", "icon": "hourglass", "blurb": "You think big, plan patiently and stay calm about it. Once you decide, very little moves you.", "at": [-0.7071, 0.0, 0.7071], "bias": 0.0809}, {"id": "light", "name": "Light Yagami", "genre": "Anime", "arch": "The Mastermind", "quote": "I am justice!", "c1": "#ff4d6d", "c2": "#f8f9fa", "icon": "eye", "blurb": "Sharp, ambitious and very sure of your logic. You like a clean plan and a perfectly kept notebook.", "at": [-0.7071, 0.7071, 0.0], "bias": -0.2124}];
+const MAXABS=[11, 11, 10];
+
+
+(() => {
+const CCI_HANDLE = ""; // optional: the CCI Instagram handle without @, used in the caption
+const $ = s => document.querySelector(s);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* One quote per screen: intro, questions 1 to 6, result. */
+const FOOT = [
+  ['With great power comes great responsibility.', 'Uncle Ben, Spider-Man'],
+  ['I find your lack of faith disturbing.', 'Darth Vader, Star Wars'],
+  ["I'm gonna be King of the Pirates!", 'Monkey D. Luffy, One Piece'],
+  ["It's dangerous to go alone! Take this.", 'Old Man, The Legend of Zelda'],
+  ['One does not simply walk into Mordor.', 'Boromir, The Lord of the Rings'],
+  ['Maximum effort!', 'Deadpool'],
+  ['Do or do not. There is no try.', 'Yoda, Star Wars'],
+  ["I'll be back.", 'The Terminator']
+];
+function setFoot(i) { $('#qline').textContent = '“' + FOOT[i][0] + '”'; $('#qby').textContent = FOOT[i][1]; }
+
+/* ---------- geometry (all icons live in a 100 x 100 box) ---------- */
+const f = n => +n.toFixed(2);
+const poly = pts => 'M' + pts.map(p => f(p[0]) + ' ' + f(p[1])).join('L') + 'Z';
+const starPts = (cx, cy, R, r, n, rot = -90) => Array.from({length: n * 2}, (_, i) => { const a = (rot + i * 180 / n) * Math.PI / 180, d = i % 2 ? r : R; return [cx + d * Math.cos(a), cy + d * Math.sin(a)]; });
+const ngonPts = (cx, cy, r, n, rot = -90) => Array.from({length: n}, (_, i) => { const a = (rot + i * 360 / n) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; });
+const star = (...a) => poly(starPts(...a));
+const ngon = (...a) => poly(ngonPts(...a));
+const circ = (cx, cy, r, n = 24) => poly(ngonPts(cx, cy, r, n, 0));
+const almond = () => { const top = Array.from({length: 17}, (_, i) => [10 + 80 * i / 16, 50 - 28 * Math.sin(Math.PI * i / 16)]); const bot = Array.from({length: 17}, (_, i) => [90 - 80 * i / 16, 50 + 28 * Math.sin(Math.PI * i / 16)]); return poly(top.concat(bot.slice(1, -1))); };
+
+const ICONS = {
+  star: star(50, 53, 42, 18, 5),
+  tri: ngon(50, 58, 44, 3, -90) + ngon(50, 56, 18, 3, 90),
+  hexring: ngon(50, 50, 42, 6, 0) + circ(50, 50, 18),
+  shield: poly([[50, 8], [86, 20], [86, 52], [50, 92], [14, 52], [14, 20]]) + poly([[50, 24], [72, 31], [72, 50], [50, 76], [28, 50], [28, 31]]),
+  sparkle: star(50, 50, 44, 9, 4),
+  chevrons: poly([[50, 6], [88, 40], [88, 56], [50, 22], [12, 56], [12, 40]]) + poly([[50, 40], [88, 74], [88, 90], [50, 56], [12, 90], [12, 74]]),
+  sunburst: star(50, 50, 46, 30, 12) + circ(50, 50, 14),
+  mountains: poly([[6, 88], [38, 26], [56, 58], [70, 38], [94, 88]]),
+  die: poly([[14, 14], [86, 14], [86, 86], [14, 86]]) + [[32, 32], [68, 32], [50, 50], [32, 68], [68, 68]].map(p => circ(p[0], p[1], 7, 12)).join(''),
+  crown: poly([[10, 80], [10, 30], [30, 52], [50, 18], [70, 52], [90, 30], [90, 80]]),
+  hourglass: poly([[22, 10], [78, 10], [78, 24], [58, 50], [78, 76], [78, 90], [22, 90], [22, 76], [42, 50], [22, 24]]),
+  eye: almond() + circ(50, 50, 14)
+};
+const SPARKS = [star(30, 40, 12, 3, 4), star(176, 58, 9, 2.4, 4), star(164, 170, 11, 2.8, 4)];
+
+function emblem(icon, bn = 16, br = 64) {
+  const mid = icon
+    ? `<g transform="translate(54 54) scale(.92)"><g class="e-icon"><path d="${ICONS[icon]}"/></g></g>`
+    : `<text class="e-q" x="100" y="136">?</text>`;
+  return `<svg viewBox="0 0 200 200" class="eart" aria-hidden="true" focusable="false">
+    <g class="e-burst"><path d="${star(100, 100, 98, br, bn)}"/></g>
+    <g class="e-ring"><circle class="e-ringc" cx="100" cy="100" r="80"/></g>
+    <circle class="e-disc" cx="100" cy="100" r="60"/>
+    ${mid}
+    ${SPARKS.map((d, i) => `<g class="e-sp" style="animation-delay:${(i * 0.7).toFixed(1)}s"><path d="${d}"/></g>`).join('')}
+  </svg>`;
+}
+
+/* ---------- one theme per character ---------- */
+const THEMES = {
+  captain: {bg1: '#0d2f86', bg2: '#06173f', ink: '#06102e', paper: '#f6f7fb', band: '#06102e', ac: '#e63946', bandA: '#ffffff', burst: '#e63946', disc: '#06102e', rim: '#f6f7fb', icon: '#f6f7fb', fg: '#f6f7fb', edge: '#f6f7fb', shadow: '#e63946', font: 'Black Ops One', fw: 400, bn: 5, br: 42,
+    pat: [{k: 'stripes', c: 'rgba(230,57,70,.26)', w: 70}, {k: 'stars', c: 'rgba(255,255,255,.3)', n: 34}]},
+  spider: {bg1: '#d4202f', bg2: '#85101c', ink: '#0b1233', paper: '#ffffff', band: '#14224f', ac: '#2f5bff', bandA: '#ffffff', burst: '#1b2f7a', disc: '#0b1233', rim: '#ffffff', icon: '#ffffff', fg: '#ffffff', edge: '#14224f', shadow: '#14224f', font: 'Bangers', fw: 400, bn: 12, br: 62,
+    pat: [{k: 'web', c: 'rgba(255,255,255,.24)'}]},
+  iron: {bg1: '#7d0911', bg2: '#c5301f', ink: '#2b0606', paper: '#fff4d6', band: '#250505', ac: '#ffc233', bandA: '#ffc233', burst: '#ffc233', disc: '#1a0505', rim: '#6fe8ff', icon: '#e9fbff', fg: '#fff4d6', edge: '#ffc233', shadow: '#250505', font: 'Orbitron', fw: 800, bn: 6, br: 78,
+    pat: [{k: 'hex', c: 'rgba(255,194,51,.24)', c2: 'rgba(255,194,51,.10)', r: 46}]},
+  batman: {bg1: '#24263a', bg2: '#07080d', ink: '#07080d', paper: '#ececf2', band: '#000000', ac: '#ffd60a', bandA: '#ffd60a', burst: '#ffd60a', disc: '#07080d', rim: '#ffd60a', icon: '#ffd60a', fg: '#ececf2', edge: '#ffd60a', shadow: '#ffd60a', font: 'Bebas Neue', fw: 400, bn: 10, br: 40,
+    pat: [{k: 'rays', c: 'rgba(255,214,10,.09)', cx: .5, cy: 1.05, a0: 215, a1: 325, n: 14}, {k: 'bats', c: 'rgba(255,255,255,.07)', n: 10}]},
+  gandalf: {bg1: '#b4c0d2', bg2: '#8190aa', ink: '#141b2c', paper: '#fbfcff', band: '#141b2c', ac: '#ffcf5a', bandA: '#ffcf5a', burst: '#fff1b5', disc: '#141b2c', rim: '#ffcf5a', icon: '#fff1b5', fg: '#101727', edge: '#141b2c', shadow: '#ffcf5a', font: 'Cinzel', fw: 800, bn: 8, br: 52,
+    pat: [{k: 'dust', c: 'rgba(255,255,255,.6)', c2: 'rgba(255,241,181,.85)'}]},
+  naruto: {bg1: '#ff9a1a', bg2: '#f05a0a', ink: '#0a1f5c', paper: '#fff7e6', band: '#0a1f5c', ac: '#2d6bff', bandA: '#ffd23f', burst: '#1a44c2', disc: '#0a1f5c', rim: '#fff7e6', icon: '#ffd23f', fg: '#0a1f5c', edge: '#0a1f5c', shadow: '#0a1f5c', font: 'Bangers', fw: 400, bn: 14, br: 68,
+    pat: [{k: 'swirl', c: 'rgba(10,31,92,.17)', n: 5, size: 46}]},
+  goku: {bg1: '#2447b8', bg2: '#0a1850', ink: '#0a1850', paper: '#fff7e0', band: '#0a1850', ac: '#ff9a1f', bandA: '#ffe14d', burst: '#ffe14d', disc: '#0a1850', rim: '#ff9a1f', icon: '#ffe14d', fg: '#fff7e0', edge: '#ff9a1f', shadow: '#ff9a1f', font: 'Bangers', fw: 400, bn: 12, br: 56,
+    pat: [{k: 'rays', c: 'rgba(255,154,31,.16)', cx: .5, cy: .28, a0: 0, a1: 360, n: 28}]},
+  kratos: {bg1: '#7d1212', bg2: '#240606', ink: '#140505', paper: '#efe6d8', band: '#140505', ac: '#c1121f', bandA: '#e8d3b0', burst: '#c1121f', disc: '#140505', rim: '#efe6d8', icon: '#efe6d8', fg: '#efe6d8', edge: '#efe6d8', shadow: '#140505', font: 'Cinzel', fw: 800, bn: 8, br: 48,
+    pat: [{k: 'embers', c: 'rgba(255,140,60,.55)', c2: 'rgba(239,230,216,.10)', c3: 'rgba(255,200,120,.45)'}]},
+  joker: {bg1: '#611fa6', bg2: '#25083f', ink: '#1a0633', paper: '#fdf7ff', band: '#1a0633', ac: '#7bff00', bandA: '#7bff00', burst: '#7bff00', disc: '#1a0633', rim: '#7bff00', icon: '#fdf7ff', fg: '#fdf7ff', edge: '#7bff00', shadow: '#7bff00', font: 'Bangers', fw: 400, bn: 16, br: 64,
+    pat: [{k: 'check', c: 'rgba(123,255,0,.10)', c2: 'rgba(0,0,0,.14)', s: 96}]},
+  loki: {bg1: '#0c6a50', bg2: '#04241d', ink: '#04201b', paper: '#f3ecd2', band: '#04201b', ac: '#f2c14e', bandA: '#f2c14e', burst: '#f2c14e', disc: '#04201b', rim: '#f2c14e', icon: '#f2c14e', fg: '#f3ecd2', edge: '#f2c14e', shadow: '#04201b', font: 'Cinzel', fw: 800, bn: 10, br: 52,
+    pat: [{k: 'scales', c: 'rgba(242,193,78,.17)', r: 64}]},
+  thanos: {bg1: '#53208a', bg2: '#150833', ink: '#150833', paper: '#f4eaff', band: '#150833', ac: '#ffc300', bandA: '#ffc300', burst: '#ffc300', disc: '#150833', rim: '#ffc300', icon: '#f4eaff', fg: '#f4eaff', edge: '#ffc300', shadow: '#ffc300', font: 'Cinzel', fw: 800, bn: 6, br: 50,
+    pat: [{k: 'cosmos', c: 'rgba(255,255,255,.7)', c2: 'rgba(255,195,0,.22)'}]},
+  light: {bg1: '#1d1d22', bg2: '#050506', ink: '#050506', paper: '#f2f2f2', band: '#000000', ac: '#d00000', bandA: '#ff3b3b', burst: '#d00000', disc: '#050506', rim: '#d00000', icon: '#f2f2f2', fg: '#f2f2f2', edge: '#d00000', shadow: '#d00000', font: 'Special Elite', fw: 400, bn: 12, br: 40,
+    pat: [{k: 'lines', c: 'rgba(255,255,255,.07)', c2: 'rgba(208,0,0,.45)', gap: 44}]}
+};
+const lum = h => { const n = parseInt(h.slice(1), 16); const c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
+const hlText = t => lum(t.ac) > .3 ? t.ink : '#ffffff';
+
+/* ---------- background patterns: one list of shapes, drawn to SVG on screen and to canvas in the PNG ---------- */
+const rngf = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const BAT = (() => { const r = [[0, -.22], [.07, -.36], [.12, -.22], [.3, -.3], [.6, -.28], [1, -.05], [.78, -.02], [.7, .14], [.5, .02], [.3, .18], [.12, .05], [0, .22]]; return r.concat(r.slice(1, -1).reverse().map(p => [-p[0], p[1]])); })();
+const PAT = {
+  stripes: (W, H, o) => { const out = []; for (let x0 = -H; x0 < W; x0 += 2 * o.w) out.push({t: 'p', pts: [[x0, 0], [x0 + o.w, 0], [x0 + o.w + H, H], [x0 + H, H]], f: o.c}); return out; },
+  stars: (W, H, o, R) => Array.from({length: o.n}, () => { const x = R() * W, y = R() * H, r = 6 + R() * 10; return {t: 'p', pts: starPts(x, y, r, r * .45, 5, -90 + R() * 72), f: o.c}; }),
+  web: (W, H, o) => { const out = [], L = Math.hypot(W, H), n = 8; [[0, 0, 0], [W, H, 180]].forEach(([ox, oy, base]) => { for (let i = 0; i <= n; i++) { const t = (base + 90 * i / n) * Math.PI / 180; out.push({t: 'l', pts: [[ox, oy], [ox + L * Math.cos(t), oy + L * Math.sin(t)]], s: o.c, sw: 3}); } for (let r = 110; r < L * .75; r += r < 400 ? 95 : 150) { const pts = []; for (let i = 0; i <= n; i++) { const t = (base + 90 * i / n) * Math.PI / 180, t2 = (base + 90 * (i + .5) / n) * Math.PI / 180; pts.push([ox + r * Math.cos(t), oy + r * Math.sin(t)]); if (i < n) pts.push([ox + r * .9 * Math.cos(t2), oy + r * .9 * Math.sin(t2)]); } out.push({t: 'l', pts, s: o.c, sw: 3}); } }); return out; },
+  hex: (W, H, o, R) => { const out = [], r = o.r, dx = r * 1.5, dy = r * Math.sqrt(3); for (let i = 0, x = 0; x < W + r; i++, x = i * dx) for (let y = i % 2 ? dy / 2 : 0; y < H + r; y += dy) out.push({t: 'p', pts: ngonPts(x, y, r - 3, 6, 0), s: o.c, sw: 3, f: R() < .07 ? o.c2 : null}); return out; },
+  rays: (W, H, o) => { const out = [], cx = o.cx * W, cy = o.cy * H, L = Math.hypot(W, H) * 1.2, st = (o.a1 - o.a0) / o.n; for (let i = 0; i < o.n; i += 2) { const p = (o.a0 + i * st) * Math.PI / 180, q = (o.a0 + (i + 1) * st) * Math.PI / 180; out.push({t: 'p', pts: [[cx, cy], [cx + L * Math.cos(p), cy + L * Math.sin(p)], [cx + L * Math.cos(q), cy + L * Math.sin(q)]], f: o.c}); } return out; },
+  swirl: (W, H, o, R) => Array.from({length: o.n}, () => { const cx = W * (.15 + R() * .7), cy = H * (.12 + R() * .76), pts = []; for (let i = 0; i <= 60; i++) { const t = i / 60 * 2.6 * 2 * Math.PI, r = o.size * t / (2 * Math.PI); pts.push([cx + r * Math.cos(t), cy + r * Math.sin(t)]); } return {t: 'l', pts, s: o.c, sw: 7}; }),
+  check: (W, H, o) => { const out = [], s = o.s; for (let j = 0; j * s < H + s; j++) for (let i = 0; i * s < W + s; i++) { const x = i * s, y = j * s; out.push({t: 'p', pts: [[x, y - s / 2], [x + s / 2, y], [x, y + s / 2], [x - s / 2, y]], f: (i + j) % 2 ? o.c2 : o.c}); } return out; },
+  bats: (W, H, o, R) => Array.from({length: o.n}, () => { const x = R() * W, y = R() * H, s = 24 + R() * 40, a = (R() - .5) * .6; return {t: 'p', pts: BAT.map(p => { const px = p[0] * s, py = p[1] * s; return [x + px * Math.cos(a) - py * Math.sin(a), y + px * Math.sin(a) + py * Math.cos(a)]; }), f: o.c}; }),
+  lines: (W, H, o) => { const out = []; for (let y = o.gap; y < H; y += o.gap) out.push({t: 'l', pts: [[0, y], [W, y]], s: o.c, sw: 3}); out.push({t: 'l', pts: [[W * .13, 0], [W * .13, H]], s: o.c2, sw: 5}); out.push({t: 'l', pts: [[W * .13 + 14, 0], [W * .13 + 14, H]], s: o.c2, sw: 3}); return out; },
+  embers: (W, H, o, R) => { const out = []; for (let i = 0; i < 5; i++) { const x = R() * W, y = R() * H * .8; out.push({t: 'l', pts: [[x, y], [x + 90 + R() * 60, y + 260 + R() * 120]], s: o.c2, sw: 3 + R() * 4}); } for (let i = 0; i < 70; i++) out.push({t: 'c', x: R() * W, y: H * (1 - Math.pow(R(), 1.7)), r: 1.5 + R() * 5, f: R() < .5 ? o.c : o.c3}); return out; },
+  dust: (W, H, o, R) => { const out = []; for (let i = 0; i < 80; i++) out.push({t: 'c', x: R() * W, y: R() * H, r: 1.2 + R() * 3.2, f: o.c}); for (let i = 0; i < 14; i++) { const r = 8 + R() * 10; out.push({t: 'p', pts: starPts(R() * W, R() * H, r, r * .25, 4), f: o.c2}); } return out; },
+  scales: (W, H, o) => { const out = [], r = o.r; for (let j = 0, y = 0; y < H + r; j++, y = j * r * .55) for (let x = j % 2 ? 0 : r; x < W + r * 2; x += r * 2) { const pts = []; for (let k = 0; k <= 6; k++) { const t = Math.PI * k / 6; pts.push([x + r * Math.cos(t), y + r * Math.sin(t)]); } out.push({t: 'l', pts, s: o.c, sw: 3}); } return out; },
+  cosmos: (W, H, o, R) => { const out = []; for (let i = 0; i < 110; i++) out.push({t: 'c', x: R() * W, y: R() * H, r: .8 + R() * R() * 3.6, f: o.c}); [150, 230, 320].forEach(r => out.push({t: 'c', x: W * .82, y: H * .16, r, s: o.c2, sw: 3})); out.push({t: 'c', x: W * .82, y: H * .16, r: 46, f: o.c2}); return out; }
+};
+const patOps = (t, W, H, seed) => { const R = rngf(seed * 7919); return t.pat.flatMap(o => PAT[o.k](W, H, o, R)); };
+const opsSvg = ops => ops.map(o => {
+  const st = (o.f ? ` fill="${o.f}"` : ' fill="none"') + (o.s ? ` stroke="${o.s}" stroke-width="${o.sw || 2}" stroke-linejoin="round" stroke-linecap="round"` : '');
+  if (o.t === 'c') return `<circle cx="${f(o.x)}" cy="${f(o.y)}" r="${f(o.r)}"${st}/>`;
+  return `<path d="M${o.pts.map(p => f(p[0]) + ' ' + f(p[1])).join('L')}${o.t === 'p' ? 'Z' : ''}"${st}/>`;
+}).join('');
+function opsCanvas(x, ops) {
+  x.save(); x.lineJoin = 'round'; x.lineCap = 'round';
+  for (const o of ops) {
+    x.beginPath();
+    if (o.t === 'c') x.arc(o.x, o.y, o.r, 0, 6.2832);
+    else { o.pts.forEach((p, i) => i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1])); if (o.t === 'p') x.closePath(); }
+    if (o.f) { x.fillStyle = o.f; x.fill(); }
+    if (o.s) { x.strokeStyle = o.s; x.lineWidth = o.sw || 2; x.stroke(); }
+  }
+  x.restore();
+}
+
+/* ---------- scoring ---------- */
+const tally = ans => { const s = [0, 0, 0]; ans.forEach((k, i) => { const v = Q[i].options[k].v; for (let a = 0; a < 3; a++) s[a] += v[a]; }); return s; };
+/* Matching: each character sits at a direction in trait space (plus a small balancing bias). The answer scores are scaled per trait, turned into a direction, and the closest character wins. Exact ties are settled by a fixed shuffle of the answers, so the same answers always give the same result. */
+const rank = (s, ans = []) => {
+  const n = s.map((x, a) => x / MAXABS[a]), m = Math.hypot(n[0], n[1], n[2]);
+  const u = m > 1e-9 ? n.map(x => x / m) : [0, 0, 0];
+  const h = ans.reduce((t, k, i) => t * 3 + k + i, 0);
+  return CH.map((c, i) => ({c, i, d: -(u[0] * c.at[0] + u[1] * c.at[1] + u[2] * c.at[2] + c.bias), t: (i * 5 + h) % 12}))
+    .sort((a, b) => Math.abs(a.d - b.d) > 1e-9 ? a.d - b.d : a.t - b.t);
+};
+const pctOf = (s, a) => Math.max(0, Math.min(100, Math.round(50 + 50 * s[a] / MAXABS[a])));
+const AXES = [['Villain', 'Hero'], ['Brawn', 'Brain'], ['Chaos', 'Order']];
+
+/* ---------- screens ---------- */
+const state = {i: 0, answers: [], lock: false, cur: null, png: null};
+function show(id) { ['intro', 'quiz', 'result'].forEach(k => { $('#' + k).hidden = k !== id; }); window.scrollTo(0, 0); }
+
+function renderQ() {
+  const q = Q[state.i];
+  $('#prog').innerHTML = Q.map((_, i) => `<i class="${i < state.i ? 'done' : i === state.i ? 'now' : ''}"></i>`).join('');
+  $('#qnum').textContent = `Question ${state.i + 1} of ${Q.length}`;
+  $('#qtext').textContent = q.text;
+  const box = $('#opts'); box.replaceChildren();
+  q.options.forEach((o, k) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'opt';
+    const badge = document.createElement('span'); badge.className = 'badge'; badge.textContent = 'ABC'[k];
+    const t = document.createElement('span'); t.textContent = o.t;
+    b.append(badge, t);
+    b.addEventListener('click', () => pick(k, b));
+    box.append(b);
+  });
+  $('#back').hidden = state.i === 0;
+  setFoot(state.i + 1);
+  const p = $('#panel'); p.classList.remove('enter'); void p.offsetWidth; p.classList.add('enter');
+}
+function pick(k, b) {
+  if (state.lock) return;
+  state.lock = true; b.classList.add('chosen'); state.answers[state.i] = k;
+  setTimeout(() => {
+    state.lock = false;
+    if (state.i < Q.length - 1) { state.i++; renderQ(); $('#qtext').focus({preventScroll: true}); }
+    else finish();
+  }, reduced ? 0 : 320);
+}
+
+function applyTheme(el, t) {
+  const v = {'--bg1': t.bg1, '--bg2': t.bg2, '--ink': t.ink, '--paper': t.paper, '--band': t.band, '--ac': t.ac, '--bandA': t.bandA, '--burst': t.burst, '--disc': t.disc, '--rim': t.rim, '--icon': t.icon, '--fg': t.fg, '--edge': t.edge, '--shadow': t.shadow, '--hlT': hlText(t), '--fw': String(t.fw), '--disp': `"${t.font}", Impact, 'Arial Black', sans-serif`};
+  for (const k in v) el.style.setProperty(k, v[k]);
+}
+function paintBg() {
+  if (!state.cur) return;
+  const card = $('#card'), w = card.clientWidth, h = card.clientHeight;
+  if (!w || !h) return;
+  const H = Math.round(h * 1080 / w), svg = $('#cardbg');
+  svg.setAttribute('viewBox', `0 0 1080 ${H}`);
+  svg.innerHTML = opsSvg(patOps(THEMES[state.cur.ch.id], 1080, H, CH.indexOf(state.cur.ch) + 1));
+}
+
+function finish() {
+  const s = tally(state.answers), r = rank(s, state.answers), ch = r[0].c, t = THEMES[ch.id];
+  const pct = [0, 1, 2].map(a => pctOf(s, a));
+  state.cur = {ch, pct};
+  applyTheme($('#card'), t);
+  $('#remblem').innerHTML = emblem(ch.icon, t.bn, t.br);
+  $('#rname').textContent = ch.name;
+  $('#rgenre').textContent = ch.genre;
+  $('#rarch').textContent = ch.arch;
+  $('#rquote').textContent = '“' + ch.quote + '”';
+  $('#rwho').textContent = '— ' + ch.name;
+  $('#rblurb').textContent = ch.blurb;
+  $('#rtraits').replaceChildren(...AXES.map((ax, a) => {
+    const w = document.createElement('div'); w.className = 'trait';
+    w.innerHTML = `<div class="lbl"><span></span><span></span></div><div class="bar"><b></b></div>`;
+    const sp = w.querySelectorAll('.lbl span'); sp[0].textContent = ax[0]; sp[1].textContent = ax[1];
+    w.querySelector('b').style.left = pct[a] + '%';
+    return w;
+  }));
+  const near = r.slice(1, 3).map(x => x.c.name);
+  const nr = $('#rnear'); nr.replaceChildren('Also close to ');
+  near.forEach((n, i) => { const b = document.createElement('b'); b.textContent = n; nr.append(b, i < near.length - 1 ? ' and ' : '.'); });
+  $('#cap').value = `I got ${ch.name}, ${ch.arch}! Which character are you? ${CCI_HANDLE ? '@' + CCI_HANDLE + ' ' : 'Tag the CCI page and a friend to compare. '}#ComicConHyderabad2026`;
+  setFoot(FOOT.length - 1);
+  show('result');
+  paintBg();
+  renderImage();
+  $('#rname').focus({preventScroll: true});
+}
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => { if (!$('#result').hidden) paintBg(); }).observe($('#card'));
+
+function reset() { state.i = 0; state.answers = []; state.lock = false; show('quiz'); renderQ(); $('#qtext').focus({preventScroll: true}); }
+
+/* ---------- toast, copy, save ---------- */
+let tt;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2600); }
+async function copyCap() {
+  const t = $('#cap');
+  try { await navigator.clipboard.writeText(t.value); toast('Caption copied'); return; } catch (e) {}
+  // some views refuse the clipboard API; the older copy command still works from a tap
+  try {
+    t.removeAttribute('readonly'); t.focus(); t.select(); t.setSelectionRange(0, t.value.length);
+    const ok = document.execCommand('copy'); t.setAttribute('readonly', '');
+    if (ok) { toast('Caption copied'); return; }
+  } catch (e) { t.setAttribute('readonly', ''); }
+  t.focus(); t.select(); toast('Caption selected. Press Ctrl+C, or tap and hold, to copy it.');
+}
+
+/* Downloads: inside Claude's viewer only the downloads capability can save a file. On an ordinary website a normal download link works.
+   Anywhere else the Download button stays hidden and the card image is shown to press and hold. */
+const FRAMED = (() => { try { return window.top !== window; } catch (e) { return true; } })();
+let DL = null, canDL = !FRAMED;
+function syncSave() { $('#save').hidden = !(canDL && state.png); }
+async function initDL() {
+  try { if (window.claude && window.claude.use) DL = await window.claude.use('downloads'); } catch (e) { DL = null; }
+  canDL = !!DL || !FRAMED;
+  syncSave();
+}
+
+let imgToken = 0;
+async function renderImage() {
+  const tok = ++imgToken, cur = state.cur;
+  state.png = null; syncSave(); $('#pngbox').hidden = true; $('#pngimg').removeAttribute('src');
+  try {
+    const cv = await cardCanvas(cur.ch, cur.pct);
+    const blob = await new Promise((res, rej) => cv.toBlob(x => x ? res(x) : rej(new Error('blob')), 'image/png'));
+    const url = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(blob); });
+    if (tok !== imgToken) return;
+    state.png = {blob, url, id: cur.ch.id};
+    $('#pngimg').src = url; $('#pngbox').hidden = false; syncSave();
+  } catch (e) { /* the on-screen card still works without the image */ }
+}
+
+function roundRect(x, X, Y, W, H, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + W, Y, X + W, Y + H, r); x.arcTo(X + W, Y + H, X, Y + H, r); x.arcTo(X, Y + H, X, Y, r); x.arcTo(X, Y, X + W, Y, r); x.closePath(); }
+function wrapText(x, text, maxW) { const words = text.split(' '), lines = []; let cur = ''; for (const w of words) { const t = cur ? cur + ' ' + w : w; if (x.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; } lines.push(cur); return lines; }
+
+async function cardCanvas(ch, pct) {
+  const t = THEMES[ch.id];
+  try { await Promise.race([Promise.all([document.fonts.load(`${t.fw} 96px "${t.font}"`), document.fonts.load('800 32px Nunito')]), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
+  const W = 1080, H = 1350, P = 36, FB = "Nunito, system-ui, sans-serif";
+  const FD = s => `${t.fw} ${s}px "${t.font}", Impact, 'Arial Black', sans-serif`;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.fillStyle = t.edge; x.fillRect(0, 0, W, H);
+  const g = x.createLinearGradient(W * .35, P, W * .65, H - P); g.addColorStop(0, t.bg1); g.addColorStop(1, t.bg2);
+  x.fillStyle = g; x.fillRect(P, P, W - 2 * P, H - 2 * P);
+  x.save(); x.beginPath(); x.rect(P, P, W - 2 * P, H - 2 * P); x.clip(); opsCanvas(x, patOps(t, W, H, CH.indexOf(ch) + 1)); x.restore();
+
+  // emblem (same shapes as the animated one on screen, 2.45x)
+  const cx = 540, cy = 380;
+  x.lineJoin = 'round'; x.lineCap = 'round';
+  const burst = new Path2D(poly(starPts(cx, cy, 240, t.br * 2.45, t.bn)));
+  x.fillStyle = t.burst; x.strokeStyle = t.ink; x.lineWidth = 6; x.fill(burst); x.stroke(burst);
+  x.strokeStyle = t.edge; x.lineWidth = 8; x.setLineDash([6, 26]);
+  x.beginPath(); x.arc(cx, cy, 196, 0, 6.2832); x.stroke(); x.setLineDash([]);
+  x.fillStyle = t.disc; x.strokeStyle = t.rim; x.lineWidth = 12;
+  x.beginPath(); x.arc(cx, cy, 147, 0, 6.2832); x.fill(); x.stroke();
+  x.save(); x.translate(cx - 112, cy - 112); x.scale(2.24, 2.24);
+  const ic = new Path2D(ICONS[ch.icon]);
+  x.fillStyle = t.icon; x.strokeStyle = t.rim; x.lineWidth = 2.6; x.fill(ic, 'evenodd'); x.stroke(ic);
+  x.restore();
+  x.save(); x.translate(cx - 245, cy - 245); x.scale(2.45, 2.45);
+  SPARKS.forEach(d => { const p = new Path2D(d); x.fillStyle = t.paper; x.strokeStyle = t.ink; x.lineWidth = 2; x.fill(p); x.stroke(p); });
+  x.restore();
+
+  // top band
+  x.fillStyle = t.band; x.fillRect(P, P, W - 2 * P, 96);
+  const L = 'COMIC CON HYDERABAD 2026', Rr = '11 TO 13 DEC';
+  let fs = 46; x.font = FD(fs);
+  while (x.measureText(L).width + x.measureText(Rr).width + 90 > W - 2 * P - 68 && fs > 22) { fs -= 2; x.font = FD(fs); }
+  x.fillStyle = t.bandA; x.textBaseline = 'alphabetic';
+  x.textAlign = 'left'; x.fillText(L, P + 34, P + 62);
+  x.textAlign = 'right'; x.fillText(Rr, W - P - 34, P + 62);
+
+  // name
+  x.textAlign = 'center';
+  x.fillStyle = t.fg; x.font = `800 32px ${FB}`;
+  if ('letterSpacing' in x) x.letterSpacing = '8px';
+  x.fillText('YOU ARE', cx, 676);
+  if ('letterSpacing' in x) x.letterSpacing = '0px';
+  const nm = ch.name.toUpperCase();
+  let size = 118; x.font = FD(size);
+  while (x.measureText(nm).width > 880 && size > 56) { size -= 4; x.font = FD(size); }
+  x.lineJoin = 'round'; x.lineWidth = 16;
+  x.strokeStyle = t.shadow; x.strokeText(nm, cx + 6, 776 + 6);
+  x.strokeStyle = t.ink; x.strokeText(nm, cx, 776);
+  x.fillStyle = t.paper; x.fillText(nm, cx, 776);
+
+  // pills
+  x.font = `800 28px ${FB}`;
+  const gt = ch.genre.toUpperCase(), at = ch.arch.toUpperCase();
+  const gw = x.measureText(gt).width + 44, aw = x.measureText(at).width + 44, gap = 16;
+  let px = cx - (gw + aw + gap) / 2; const py = 808;
+  roundRect(x, px, py, gw, 52, 26); x.fillStyle = t.ac; x.fill(); x.lineWidth = 4; x.strokeStyle = t.ink; x.stroke();
+  x.fillStyle = hlText(t); x.textAlign = 'center'; x.fillText(gt, px + gw / 2, py + 36);
+  px += gw + gap;
+  roundRect(x, px, py, aw, 52, 26); x.fillStyle = t.band; x.fill();
+  x.fillStyle = t.paper; x.fillText(at, px + aw / 2, py + 36);
+
+  // speech bubble
+  const bx = 110, by = 896, bw = 860, bh = 164;
+  roundRect(x, bx, by, bw, bh, 30); x.fillStyle = t.paper; x.fill(); x.lineWidth = 8; x.strokeStyle = t.edge; x.stroke();
+  x.beginPath(); x.moveTo(168, by); x.lineTo(206, by - 36); x.lineTo(246, by); x.closePath(); x.fillStyle = t.paper; x.fill(); x.stroke();
+  x.beginPath(); x.moveTo(176, by); x.lineTo(238, by); x.lineWidth = 12; x.strokeStyle = t.paper; x.stroke();
+  x.fillStyle = t.ink; x.textAlign = 'center';
+  let qs = 44, lines; x.font = `800 ${qs}px ${FB}`; lines = wrapText(x, '“' + ch.quote + '”', 780);
+  if (lines.length > 2) { qs = 36; x.font = `800 ${qs}px ${FB}`; lines = wrapText(x, '“' + ch.quote + '”', 780); }
+  const lh = qs + 10; let ty = by + 62 - (lines.length - 1) * (lh / 2 - 4);
+  lines.forEach(l => { x.fillText(l, cx, ty); ty += lh; });
+  x.globalAlpha = .7; x.font = `800 24px ${FB}`;
+  if ('letterSpacing' in x) x.letterSpacing = '3px';
+  x.fillText('— ' + ch.name.toUpperCase(), cx, by + bh - 18);
+  if ('letterSpacing' in x) x.letterSpacing = '0px';
+  x.globalAlpha = 1;
+
+  // traits
+  AXES.forEach((ax, i) => {
+    const y0 = 1086 + i * 46, Lx = 100, Rx = W - 100, w = Rx - Lx;
+    x.fillStyle = t.fg; x.font = `800 21px ${FB}`;
+    x.textAlign = 'left'; x.fillText(ax[0].toUpperCase(), Lx, y0 + 18);
+    x.textAlign = 'right'; x.fillText(ax[1].toUpperCase(), Rx, y0 + 18);
+    roundRect(x, Lx, y0 + 26, w, 14, 7); x.fillStyle = t.paper; x.fill(); x.lineWidth = 4; x.strokeStyle = t.edge; x.stroke();
+    const mx = Lx + w * pct[i] / 100;
+    roundRect(x, mx - 8, y0 + 18, 16, 30, 4); x.fillStyle = t.ink; x.fill(); x.lineWidth = 3; x.strokeStyle = t.paper; x.stroke();
+  });
+
+  // footer band
+  x.fillStyle = t.band; x.fillRect(P, H - P - 84, W - 2 * P, 84);
+  x.fillStyle = t.bandA; x.font = FD(46); x.textAlign = 'left'; x.fillText('CCI OFFICE', P + 34, H - P - 26);
+  x.fillStyle = t.paper; x.font = `800 26px ${FB}`; x.textAlign = 'right'; x.fillText('#ComicConHyderabad2026', W - P - 34, H - P - 28);
+  return c;
+}
+
+async function saveCard() {
+  const p = state.png; if (!p) return;
+  const name = `comic-con-hyderabad-2026-${p.id}.png`;
+  if (DL) {
+    try { await DL.save({filename: name, data: p.blob}); toast('Card saved'); }
+    catch (e) { if (!e || e.code !== 'declined') toast('Could not save. Press and hold the image instead.'); }
+    return;
+  }
+  const url = URL.createObjectURL(p.blob), a = document.createElement('a');
+  a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000); toast('Downloading your card');
+}
+
+/* ---------- wiring ---------- */
+$('#mystery').innerHTML = emblem(null);
+setFoot(0);
+initDL();
+$('#start').addEventListener('click', reset);
+$('#back').addEventListener('click', () => { if (state.i > 0) { state.i--; renderQ(); } });
+$('#again').addEventListener('click', reset);
+$('#copy').addEventListener('click', copyCap);
+$('#save').addEventListener('click', saveCard);
+})();
+</script>
+
+</body></html>
